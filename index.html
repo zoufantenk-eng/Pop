@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile - Full Customization</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #00f0ff;
+            --secondary-color: #8a2be2;
+            --bg-color: #050510;
+            --text-color: #ffffff;
+            --glow-intensity: 1;
+            --animation-speed: 1;
+            --border-radius: 20px;
+            --card-bg: rgba(10, 10, 25, 0.85);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
+            color: var(--text-color);
+            transition: background-color 0.4s ease;
+        }
+
+        /* FOREGROUND FX */
+        #particleCanvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 999; pointer-events: none;
+            opacity: 0.6; mix-blend-mode: screen;
+        }
+
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(var(--primary-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary-color) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(600px) rotateX(65deg) scale(2.5);
+            transform-origin: bottom;
+            animation: gridMove calc(15s / var(--animation-speed)) linear infinite;
+            z-index: 998; pointer-events: none;
+            opacity: 0.05; mix-blend-mode: screen;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 60px; }
+        }
+
+        /* PROFILE CONTAINER */
+        .profile-container {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: var(--border-radius);
+            padding: 40px 50px;
+            width: 100%; max-width: 750px;
+            z-index: 20;
+            box-shadow: 0 0 calc(50px * var(--glow-intensity)) rgba(0, 0, 0, 0.8), 
+                        inset 0 0 calc(30px * var(--glow-intensity)) rgba(0, 240, 255, 0.05);
+            animation: containerAppear 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profile-container:hover {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 calc(60px * var(--glow-intensity)) rgba(138, 43, 226, 0.4), 
+                        inset 0 0 calc(40px * var(--glow-intensity)) rgba(0, 240, 255, 0.1);
+        }
+
+        @keyframes containerAppear {
+            from { opacity: 0; transform: translateY(50px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Avatar Section */
+        .avatar-section {
+            display: flex; align-items: center; gap: 25px;
+            margin-bottom: 25px;
+            border-bottom: 1px dashed rgba(0, 240, 255, 0.2);
+            padding-bottom: 25px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 120px; height: 120px;
+            flex-shrink: 0; cursor: pointer;
+        }
+
+        .avatar {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex; justify-content: center; align-items: center;
+            font-size: 60px;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 calc(30px * var(--glow-intensity)) var(--primary-color);
+            position: relative; z-index: 2; overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+        }
+
+        .avatar img {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center;
+            display: none;
+        }
+
+        .avatar.has-photo { background: #000; }
+        .avatar.has-photo img { display: block; }
+        .avatar.has-photo .avatar-emoji { display: none; }
+
+        .avatar-wrapper:hover .avatar {
+            transform: scale(1.05);
+            border-color: var(--secondary-color);
+        }
+
+        .avatar-overlay {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            color: #fff; font-size: 30px;
+            opacity: 0; z-index: 3;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
+
+        .avatar-ring {
+            position: absolute; top: -10px; left: -10px;
+            width: calc(100% + 20px); height: calc(100% + 20px);
+            border-radius: 50%;
+            border: 2px dashed var(--secondary-color);
+            animation: spinRing calc(10s / var(--animation-speed)) linear infinite;
+            opacity: 0.6; pointer-events: none;
+        }
+
+        @keyframes spinRing {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .name-section { flex: 1; }
+
+        .name-section h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            color: var(--text-color);
+            letter-spacing: 2px;
+            text-shadow: 0 0 calc(15px * var(--glow-intensity)) var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .name-section .role {
+            color: var(--primary-color);
+            font-size: 16px; font-weight: 600;
+            letter-spacing: 3px; text-transform: uppercase;
+        }
+
+        .name-section .school {
+            color: #a0a0c0;
+            font-size: 14px; margin-top: 5px;
+        }
+
+        /* Bio */
+        .bio-section {
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            border-left: 3px solid var(--primary-color);
+            background: rgba(0, 240, 255, 0.05);
+            border-radius: 0 8px 8px 0;
+            font-size: 15px; line-height: 1.6;
+            color: #c0c0d0;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1; height: 1px;
+            background: linear-gradient(90deg, var(--primary-color), transparent);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px; margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px; text-align: center;
+            transition: all 0.3s ease; cursor: pointer;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: 0 0 calc(20px * var(--glow-intensity)) rgba(0, 240, 255, 0.2);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            color: var(--primary-color);
+            text-shadow: 0 0 calc(10px * var(--glow-intensity)) var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px; color: #8080a0;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Skills */
+        .skills-container {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .skill-tag {
+            padding: 8px 16px;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px; font-size: 13px;
+            color: var(--primary-color); cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .skill-tag:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 calc(20px * var(--glow-intensity)) var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Contact */
+        .contact-section {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            flex: 1; min-width: 120px;
+            padding: 12px 20px;
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 700; letter-spacing: 1px;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: all 0.3s ease; text-decoration: none;
+            position: relative; overflow: hidden;
+        }
+
+        .contact-btn::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .contact-btn:hover::before { left: 100%; }
+
+        .contact-btn:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 calc(30px * var(--glow-intensity)) var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* SETTINGS PANEL */
+        .settings-toggle {
+            position: fixed; top: 20px; right: 20px;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 24px; cursor: pointer; z-index: 2000;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .settings-toggle:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .settings-panel {
+            position: fixed; top: 80px; right: 20px;
+            background: rgba(10, 10, 25, 0.98);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px; padding: 25px; width: 340px;
+            z-index: 2000;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            transform: translateX(120%); opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            pointer-events: none; max-height: 85vh; overflow-y: auto;
+        }
+        .settings-panel.active {
+            transform: translateX(0); opacity: 1; pointer-events: auto;
+        }
+
+        .settings-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            margin-bottom: 20px; text-align: center;
+            font-size: 16px; letter-spacing: 2px;
+        }
+
+        .setting-item { margin-bottom: 20px; }
+        .setting-item > label {
+            display: block; color: var(--text-color);
+            font-size: 12px; margin-bottom: 8px; letter-spacing: 1px;
+        }
+
+        /* Tabs */
+        .settings-tabs {
+            display: flex; gap: 5px; margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            padding-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .settings-tab {
+            padding: 6px 12px; background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px; color: #8080a0;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .settings-tab:hover { color: var(--primary-color); }
+        .settings-tab.active {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Color Picker */
+        .color-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .color-btn {
+            width: 35px; height: 35px; border-radius: 50%;
+            border: 2px solid transparent; cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .color-btn:hover { transform: scale(1.2); }
+        .color-btn.active { border-color: #fff; box-shadow: 0 0 15px currentColor; }
+
+        /* Slider */
+        input[type="range"] {
+            width: 100%; -webkit-appearance: none;
+            background: transparent; cursor: pointer; height: 20px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px; background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            border-radius: 50%; background: var(--primary-color);
+            margin-top: -5px; box-shadow: 0 0 10px var(--primary-color);
+            cursor: grab;
+        }
+        input[type="range"]::-webkit-slider-thumb:active {
+            cursor: grabbing; transform: scale(1.3);
+        }
+        input[type="range"]::-moz-range-track {
+            height: 6px; background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px; height: 16px; border: none;
+            border-radius: 50%; background: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color); cursor: grab;
+        }
+
+        .edit-input {
+            width: 100%; padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 6px; color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px; outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .edit-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        /* Avatar Upload */
+        .avatar-upload-section { display: flex; flex-direction: column; gap: 10px; }
+
+        .upload-btn {
+            padding: 12px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px; color: var(--primary-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; text-align: center;
+            transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+
+        .upload-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .upload-btn input[type="file"] { display: none; }
+
+        .remove-photo-btn {
+            padding: 8px;
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid #ff0055;
+            border-radius: 6px; color: #ff0055;
+            font-size: 12px; cursor: pointer;
+            transition: all 0.3s ease; display: none;
+        }
+
+        .remove-photo-btn.show { display: block; }
+        .remove-photo-btn:hover { background: #ff0055; color: #fff; }
+
+        .emoji-picker-btn {
+            width: 100%; padding: 12px;
+            background: rgba(138, 43, 226, 0.15);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px; color: var(--secondary-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+
+        .emoji-picker-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+        }
+
+        /* List Editor (untuk Statistik, Skill, Kontak) */
+        .list-editor {
+            display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .list-item-editor {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex; flex-direction: column; gap: 8px;
+            position: relative;
+        }
+
+        .list-item-editor .row {
+            display: flex; gap: 8px; align-items: center;
+        }
+
+        .list-item-editor input {
+            flex: 1;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .list-item-editor input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .list-item-editor input.small {
+            flex: 0 0 60px;
+            text-align: center;
+        }
+
+        .list-item-editor input.emoji-input {
+            flex: 0 0 45px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .delete-item-btn {
+            position: absolute;
+            top: 5px; right: 5px;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 0, 85, 0.2);
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            font-size: 12px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .delete-item-btn:hover {
+            background: #ff0055;
+            color: #fff;
+        }
+
+        .add-item-btn {
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px dashed #00ff88;
+            border-radius: 8px;
+            color: #00ff88;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-item-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%); z-index: 3000;
+            display: flex; flex-direction: column; gap: 10px; align-items: center;
+        }
+
+        .toast {
+            background: rgba(10, 10, 25, 0.95);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px 24px; border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px; letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            backdrop-filter: blur(10px);
+            opacity: 0; transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        /* Emoji Modal */
+        .emoji-modal {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 5000; display: none;
+            justify-content: center; align-items: center;
+            padding: 20px; backdrop-filter: blur(5px);
+        }
+
+        .emoji-modal.active { display: flex; animation: fadeInModal 0.3s ease; }
+
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+
+        .emoji-modal-content {
+            background: rgba(10, 10, 25, 0.98);
+            border: 1px solid var(--primary-color);
+            border-radius: 15px; width: 100%; max-width: 500px;
+            max-height: 85vh; display: flex; flex-direction: column;
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+            animation: slideUpModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .emoji-modal-header {
+            padding: 20px; border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .emoji-modal-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            font-size: 16px; letter-spacing: 2px;
+        }
+
+        .emoji-close-btn {
+            background: transparent; border: none;
+            color: var(--primary-color); font-size: 24px;
+            cursor: pointer; transition: transform 0.3s ease;
+        }
+
+        .emoji-close-btn:hover { transform: rotate(90deg); }
+
+        .emoji-search-container {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .emoji-search {
+            width: 100%; padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px; color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px; outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .emoji-search:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .emoji-categories {
+            display: flex; gap: 5px; padding: 10px 20px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+            scrollbar-width: thin;
+        }
+
+        .emoji-categories::-webkit-scrollbar { height: 4px; }
+        .emoji-categories::-webkit-scrollbar-thumb {
+            background: var(--primary-color); border-radius: 2px;
+        }
+
+        .emoji-cat-btn {
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 15px; color: var(--text-color);
+            font-size: 12px; cursor: pointer;
+            white-space: nowrap; transition: all 0.3s ease;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .emoji-cat-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .emoji-cat-btn.active {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .emoji-grid {
+            flex: 1; overflow-y: auto; padding: 15px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 5px; scrollbar-width: thin;
+        }
+
+        .emoji-grid::-webkit-scrollbar { width: 6px; }
+        .emoji-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05); border-radius: 3px;
+        }
+        .emoji-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-color); border-radius: 3px;
+        }
+
+        .emoji-item {
+            width: 45px; height: 45px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 26px; cursor: pointer; border-radius: 8px;
+            transition: all 0.2s ease; border: 1px solid transparent;
+            user-select: none;
+        }
+
+        .emoji-item:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary-color);
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .emoji-item.selected {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .emoji-empty {
+            text-align: center; color: #8080a0;
+            padding: 40px; font-size: 14px; grid-column: 1 / -1;
+        }
+
+        /* Crop Modal */
+        .crop-modal {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 5000; display: none;
+            justify-content: center; align-items: center;
+            flex-direction: column; padding: 20px;
+        }
+
+        .crop-modal.active { display: flex; }
+
+        .crop-container {
+            position: relative; width: 300px; height: 300px;
+            border-radius: 50%; overflow: hidden;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 50px var(--primary-color);
+            cursor: grab; background: #111;
+        }
+
+        .crop-container:active { cursor: grabbing; }
+
+        .crop-container img {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            min-width: 100%; min-height: 100%;
+            user-select: none; pointer-events: none;
+        }
+
+        .crop-controls {
+            margin-top: 25px;
+            display: flex; flex-direction: column; gap: 15px;
+            align-items: center; width: 100%; max-width: 350px;
+        }
+
+        .crop-controls label {
+            color: var(--text-color); font-size: 14px; align-self: flex-start;
+        }
+
+        .crop-buttons { display: flex; gap: 15px; }
+
+        .crop-btn {
+            padding: 10px 30px; border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .crop-btn.cancel {
+            background: transparent; border: 1px solid #ff0055;
+            color: #ff0055;
+        }
+        .crop-btn.cancel:hover { background: #ff0055; color: #fff; }
+
+        .crop-btn.confirm {
+            background: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            color: var(--bg-color);
+        }
+        .crop-btn.confirm:hover {
+            box-shadow: 0 0 25px var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-container { padding: 30px 20px; margin: 0; }
+            .avatar-section { flex-direction: column; text-align: center; gap: 15px; }
+            .name-section h1 { font-size: 22px; }
+            .settings-panel { width: calc(100% - 40px); right: 20px; }
+            .settings-toggle { top: 15px; right: 15px; width: 40px; height: 40px; font-size: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .emoji-modal-content { max-height: 90vh; }
+            .emoji-grid { grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); }
+            .emoji-item { width: 40px; height: 40px; font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FOREGROUND FX -->
+    <div class="bg-grid"></div>
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- SETTINGS -->
+    <div class="settings-toggle" id="settingsToggle">⚙️</div>
+    <div class="settings-panel" id="settingsPanel">
+        <h3>PROFILE CONFIG</h3>
+
+        <!-- Tabs -->
+        <div class="settings-tabs">
+            <button class="settings-tab active" data-tab="profile">Profil</button>
+            <button class="settings-tab" data-tab="stats">Statistik</button>
+            <button class="settings-tab" data-tab="skills">Skills</button>
+            <button class="settings-tab" data-tab="contacts">Kontak</button>
+            <button class="settings-tab" data-tab="theme">Tema</button>
+        </div>
+
+        <!-- Tab: Profile -->
+        <div class="tab-content active" id="tab-profile">
+            <div class="setting-item">
+                <label>Foto Profil</label>
+                <div class="avatar-upload-section">
+                    <label class="upload-btn" for="photoUpload">
+                        📷 Upload Foto
+                        <input type="file" id="photoUpload" accept="image/*">
+                    </label>
+                    <button class="remove-photo-btn" id="removePhotoBtn">🗑️ Hapus Foto</button>
+                    <button class="emoji-picker-btn" id="emojiPickerBtn">😀 Pilih Emoji Avatar</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>Nama Lengkap</label>
+                <input type="text" class="edit-input" id="editName" value="Arya Pratama" placeholder="Nama kamu...">
+            </div>
+            <div class="setting-item">
+                <label>Role / Status</label>
+                <input type="text" class="edit-input" id="editRole" value="Student & Future Developer" placeholder="Role kamu...">
+            </div>
+            <div class="setting-item">
+                <label>Sekolah / Instansi</label>
+                <input type="text" class="edit-input" id="editSchool" value="SMK Negeri 1 • Kelas XI RPL" placeholder="Sekolah kamu...">
+            </div>
+            <div class="setting-item">
+                <label>Bio Singkat</label>
+                <input type="text" class="edit-input" id="editBio" value="Siswa SMK Negeri 1 • Calon Fullstack Developer • Pecinta Teknologi & Desain" placeholder="Bio kamu...">
+            </div>
+        </div>
+
+        <!-- Tab: Stats -->
+        <div class="tab-content" id="tab-stats">
+            <div class="setting-item">
+                <label>Statistik Pelajar</label>
+                <div class="list-editor" id="statsEditor"></div>
+                <button class="add-item-btn" id="addStatBtn">+ Tambah Statistik</button>
+            </div>
+        </div>
+
+        <!-- Tab: Skills -->
+        <div class="tab-content" id="tab-skills">
+            <div class="setting-item">
+                <label>Skills</label>
+                <div class="list-editor" id="skillsEditor"></div>
+                <button class="add-item-btn" id="addSkillBtn">+ Tambah Skill</button>
+            </div>
+        </div>
+
+        <!-- Tab: Contacts -->
+        <div class="tab-content" id="tab-contacts">
+            <div class="setting-item">
+                <label>Kontak</label>
+                <div class="list-editor" id="contactsEditor"></div>
+                <button class="add-item-btn" id="addContactBtn">+ Tambah Kontak</button>
+            </div>
+        </div>
+
+        <!-- Tab: Theme -->
+        <div class="tab-content" id="tab-theme">
+            <div class="setting-item">
+                <label>Theme Color</label>
+                <div class="color-options" id="colorOptions">
+                    <div class="color-btn active" style="background: #00f0ff;" data-color="#00f0ff" data-secondary="#8a2be2"></div>
+                    <div class="color-btn" style="background: #ff0055;" data-color="#ff0055" data-secondary="#ffaa00"></div>
+                    <div class="color-btn" style="background: #00ff88;" data-color="#00ff88" data-secondary="#00f0ff"></div>
+                    <div class="color-btn" style="background: #ffaa00;" data-color="#ffaa00" data-secondary="#ff0055"></div>
+                    <div class="color-btn" style="background: #b000ff;" data-color="#b000ff" data-secondary="#00f0ff"></div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>Glow Intensity: <span id="glowVal">1.0</span></label>
+                <input type="range" id="glowRange" min="0" max="3" step="0.1" value="1">
+            </div>
+            <div class="setting-item">
+                <label>Animation Speed: <span id="speedVal">1.0</span>x</label>
+                <input type="range" id="speedRange" min="0.5" max="3" step="0.1" value="1">
+            </div>
+            <div class="setting-item">
+                <label>Border Radius: <span id="radiusVal">20</span>px</label>
+                <input type="range" id="radiusRange" min="0" max="40" step="1" value="20">
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE CARD -->
+    <div class="profile-container" id="profileCard">
+        <div class="avatar-section">
+            <div class="avatar-wrapper" id="avatarWrapper" title="Klik untuk ganti foto">
+                <div class="avatar" id="avatarIcon">
+                    <span class="avatar-emoji" id="avatarEmoji">👨‍💻</span>
+                    <img id="avatarImg" src="" alt="Profile">
+                </div>
+                <div class="avatar-overlay">📷</div>
+                <div class="avatar-ring"></div>
+            </div>
+            <div class="name-section">
+                <h1 id="displayName">Arya Pratama</h1>
+                <div class="role" id="displayRole">Student & Future Developer</div>
+                <div class="school" id="displaySchool">SMK Negeri 1 • Kelas XI RPL</div>
+            </div>
+        </div>
+
+        <div class="bio-section" id="displayBio">
+            Siswa SMK Negeri 1 • Calon Fullstack Developer • Pecinta Teknologi & Desain
+        </div>
+
+        <div class="section-title">📊 STATISTIK</div>
+        <div class="stats-grid" id="displayStats"></div>
+
+        <div class="section-title">⚡ SKILLS</div>
+        <div class="skills-container" id="displaySkills"></div>
+
+        <div class="section-title">📡 KONTAK</div>
+        <div class="contact-section" id="displayContacts"></div>
+    </div>
+
+    <!-- EMOJI PICKER MODAL -->
+    <div class="emoji-modal" id="emojiModal">
+        <div class="emoji-modal-content">
+            <div class="emoji-modal-header">
+                <h3>PILIH EMOJI AVATAR</h3>
+                <button class="emoji-close-btn" id="emojiCloseBtn">✕</button>
+            </div>
+            <div class="emoji-search-container">
+                <input type="text" class="emoji-search" id="emojiSearch" placeholder="🔍 Cari emoji...">
+            </div>
+            <div class="emoji-categories" id="emojiCategories"></div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
+    </div>
+
+    <!-- CROP MODAL -->
+    <div class="crop-modal" id="cropModal">
+        <h3 style="color: var(--primary-color); font-family: 'Orbitron', sans-serif; margin-bottom: 20px; letter-spacing: 2px;">SESUAIKAN FOTO</h3>
+        <div class="crop-container" id="cropContainer">
+            <img id="cropImage" src="" alt="Crop">
+        </div>
+        <div class="crop-controls">
+            <label>Zoom: <input type="range" id="zoomRange" min="1" max="3" step="0.01" value="1" style="width: 200px; vertical-align: middle;"></label>
+            <div class="crop-buttons">
+                <button class="crop-btn cancel" id="cropCancel">Batal</button>
+                <button class="crop-btn confirm" id="cropConfirm">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ==========================================
+        // 1. CANVAS PARTICLE SYSTEM
+        // ==========================================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x; mouse.y = e.y;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null; mouse.y = null;
+        });
+
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x; this.y = y;
+                this.directionX = directionX; this.directionY = directionY;
+                this.size = size; this.color = color;
+                this.baseX = x; this.baseY = y;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color; ctx.fill();
+            }
+            update() {
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= forceDirectionX * force * 5;
+                        this.y -= forceDirectionY * force * 5;
+                    } else {
+                        if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 10;
+                        if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 10;
+                    }
+                }
+                this.x += this.directionX; this.y += this.directionY;
+                if (this.x < 0 || this.x > canvas.width) this.directionX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.directionY *= -1;
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 15000;
+            numberOfParticles = Math.min(numberOfParticles, 120);
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.4) - 0.2;
+                let directionY = (Math.random() * 0.4) - 0.2;
+                particles.push(new Particle(x, y, directionX, directionY, size, primaryColor));
+            }
+        }
+
+        function animateParticles() {
+            requestAnimationFrame(animateParticles);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            for (let i = 0; i < particles.length; i++) particles[i].update();
+            connectParticles();
+        }
+
+        function connectParticles() {
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+            const r = parseInt(primaryColor.slice(1, 3), 16);
+            const g = parseInt(primaryColor.slice(3, 5), 16);
+            const b = parseInt(primaryColor.slice(5, 7), 16);
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let distance = ((particles[a].x - particles[b].x) ** 2) + ((particles[a].y - particles[b].y) ** 2);
+                    if (distance < (canvas.width / 10) * (canvas.height / 10)) {
+                        let opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacityValue * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        initParticles();
+        animateParticles();
+
+        // ==========================================
+        // 2. AUDIO & TOAST
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playClickSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        const toastContainer = document.getElementById('toastContainer');
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            toastContainer.appendChild(toast);
+            playClickSound();
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // ==========================================
+        // 3. DATA DEFAULT (Bisa diedit user)
+        // ==========================================
+        const defaultData = {
+            name: "Arya Pratama",
+            role: "Student & Future Developer",
+            school: "SMK Negeri 1 • Kelas XI RPL",
+            bio: "Siswa SMK Negeri 1 • Calon Fullstack Developer • Pecinta Teknologi & Desain",
+            stats: [
+                { value: "3.85", label: "IPK" },
+                { value: "12", label: "Proyek" },
+                { value: "8", label: "Sertifikat" },
+                { value: "240", label: "Jam Coding" }
+            ],
+            skills: [
+                { emoji: "🌐", name: "HTML/CSS" },
+                { emoji: "⚡", name: "JavaScript" },
+                { emoji: "⚛️", name: "React" },
+                { emoji: "🎨", name: "UI/UX" },
+                { emoji: "🐍", name: "Python" }
+            ],
+            contacts: [
+                { emoji: "📧", label: "Email", link: "mailto:email@example.com" },
+                { emoji: "💻", label: "GitHub", link: "https://github.com" },
+                { emoji: "📸", label: "Instagram", link: "https://instagram.com" }
+            ]
+        };
+
+        // Load dari localStorage jika ada
+        let profileData = JSON.parse(localStorage.getItem('profileData')) || defaultData;
+
+        // Simpan ke localStorage
+        function saveData() {
+            localStorage.setItem('profileData', JSON.stringify(profileData));
+        }
+
+        // ==========================================
+        // 4. RENDER FUNCTIONS
+        // ==========================================
+        // Render Stats
+        function renderStats() {
+            const container = document.getElementById('displayStats');
+            container.innerHTML = '';
+            profileData.stats.forEach(stat => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+                card.onclick = () => showToast(`${stat.label}: ${stat.value} 🌟`);
+                container.appendChild(card);
+            });
+        }
+
+        // Render Skills
+        function renderSkills() {
+            const container = document.getElementById('displaySkills');
+            container.innerHTML = '';
+            profileData.skills.forEach(skill => {
+                const tag = document.createElement('div');
+                tag.className = 'skill-tag';
+                tag.innerHTML = `${skill.emoji} ${skill.name}`;
+                tag.onclick = () => showToast(`${skill.emoji} ${skill.name}`);
+                container.appendChild(tag);
+            });
+        }
+
+        // Render Contacts
+        function renderContacts() {
+            const container = document.getElementById('displayContacts');
+            container.innerHTML = '';
+            profileData.contacts.forEach(contact => {
+                const btn = document.createElement('a');
+                btn.className = 'contact-btn';
+                btn.href = contact.link;
+                btn.target = '_blank';
+                btn.innerHTML = `${contact.emoji} ${contact.label}`;
+                if (contact.link.startsWith('mailto:')) btn.target = '_self';
+                container.appendChild(btn);
+            });
+        }
+
+        // Render semua
+        function renderAll() {
+            document.getElementById('displayName').textContent = profileData.name;
+            document.getElementById('displayRole').textContent = profileData.role;
+            document.getElementById('displaySchool').textContent = profileData.school;
+            document.getElementById('displayBio').textContent = profileData.bio;
+            renderStats();
+            renderSkills();
+            renderContacts();
+        }
+
+        // ==========================================
+        // 5. EDITOR RENDER (untuk panel settings)
+        // ==========================================
+        // Stats Editor
+        function renderStatsEditor() {
+            const editor = document.getElementById('statsEditor');
+            editor.innerHTML = '';
+            profileData.stats.forEach((stat, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-item-editor';
+                item.innerHTML = `
+                    <button class="delete-item-btn" data-index="${index}" data-type="stats">✕</button>
+                    <div class="row">
+                        <input type="text" class="small" value="${stat.value}" data-index="${index}" data-field="value" data-type="stats" placeholder="Nilai">
+                        <input type="text" value="${stat.label}" data-index="${index}" data-field="label" data-type="stats" placeholder="Label">
+                    </div>
+                `;
+                editor.appendChild(item);
+            });
+            bindEditorInputs('stats');
+        }
+
+        // Skills Editor
+        function renderSkillsEditor() {
+            const editor = document.getElementById('skillsEditor');
+            editor.innerHTML = '';
+            profileData.skills.forEach((skill, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-item-editor';
+                item.innerHTML = `
+                    <button class="delete-item-btn" data-index="${index}" data-type="skills">✕</button>
+                    <div class="row">
+                        <input type="text" class="emoji-input" value="${skill.emoji}" data-index="${index}" data-field="emoji" data-type="skills" placeholder="😀">
+                        <input type="text" value="${skill.name}" data-index="${index}" data-field="name" data-type="skills" placeholder="Nama Skill">
+                    </div>
+                `;
+                editor.appendChild(item);
+            });
+            bindEditorInputs('skills');
+        }
+
+        // Contacts Editor
+        function renderContactsEditor() {
+            const editor = document.getElementById('contactsEditor');
+            editor.innerHTML = '';
+            profileData.contacts.forEach((contact, index) => {
+                const item = document.createElement('div');
+                item.className = 'list-item-editor';
+                item.innerHTML = `
+                    <button class="delete-item-btn" data-index="${index}" data-type="contacts">✕</button>
+                    <div class="row">
+                        <input type="text" class="emoji-input" value="${contact.emoji}" data-index="${index}" data-field="emoji" data-type="contacts" placeholder="😀">
+                        <input type="text" value="${contact.label}" data-index="${index}" data-field="label" data-type="contacts" placeholder="Label">
+                    </div>
+                    <div class="row">
+                        <input type="text" value="${contact.link}" data-index="${index}" data-field="link" data-type="contacts" placeholder="Link (https://...)">
+                    </div>
+                `;
+                editor.appendChild(item);
+            });
+            bindEditorInputs('contacts');
+        }
+
+        // Bind input events untuk semua editor
+        function bindEditorInputs(type) {
+            const inputs = document.querySelectorAll(`#${type}Editor input`);
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const field = this.getAttribute('data-field');
+                    profileData[type][index][field] = this.value;
+                    saveData();
+                    renderAll();
+                    if (type === 'stats') renderStatsEditor(); // Re-render untuk update value display
+                });
+            });
+        }
+
+        // Bind delete buttons
+        function bindDeleteButtons() {
+            document.querySelectorAll('.delete-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const type = this.getAttribute('data-type');
+                    profileData[type].splice(index, 1);
+                    saveData();
+                    renderAll();
+                    if (type === 'stats') renderStatsEditor();
+                    if (type === 'skills') renderSkillsEditor();
+                    if (type === 'contacts') renderContactsEditor();
+                    bindDeleteButtons();
+                    playClickSound();
+                    showToast('🗑️ Item dihapus');
+                });
+            });
+        }
+
+        // ==========================================
+        // 6. INITIAL RENDER
+        // ==========================================
+        renderAll();
+        renderStatsEditor();
+        renderSkillsEditor();
+        renderContactsEditor();
+        bindDeleteButtons();
+
+        // ==========================================
+        // 7. ADD BUTTONS
+        // ==========================================
+        document.getElementById('addStatBtn').addEventListener('click', () => {
+            profileData.stats.push({ value: "0", label: "Stat Baru" });
+            saveData();
+            renderAll();
+            renderStatsEditor();
+            bindDeleteButtons();
+            playClickSound();
+            showToast('✅ Statistik ditambahkan');
+        });
+
+        document.getElementById('addSkillBtn').addEventListener('click', () => {
+            profileData.skills.push({ emoji: "⭐", name: "Skill Baru" });
+            saveData();
+            renderAll();
+            renderSkillsEditor();
+            bindDeleteButtons();
+            playClickSound();
+            showToast('✅ Skill ditambahkan');
+        });
+
+        document.getElementById('addContactBtn').addEventListener('click', () => {
+            profileData.contacts.push({ emoji: "🔗", label: "Kontak Baru", link: "https://" });
+            saveData();
+            renderAll();
+            renderContactsEditor();
+            bindDeleteButtons();
+            playClickSound();
+            showToast('✅ Kontak ditambahkan');
+        });
+
+        // ==========================================
+        // 8. SETTINGS PANEL LOGIC
+        // ==========================================
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const root = document.documentElement;
+
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            settingsPanel.classList.toggle('active');
+            playClickSound();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!settingsPanel.contains(e.target) && e.target !== settingsToggle) {
+                settingsPanel.classList.remove('active');
+            }
+        });
+        settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+        // Tabs
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.getAttribute('data-tab')).classList.add('active');
+                playClickSound();
+            });
+        });
+
+        // Edit Profile Fields
+        const editName = document.getElementById('editName');
+        const editRole = document.getElementById('editRole');
+        const editSchool = document.getElementById('editSchool');
+        const editBio = document.getElementById('editBio');
+
+        editName.value = profileData.name;
+        editRole.value = profileData.role;
+        editSchool.value = profileData.school;
+        editBio.value = profileData.bio;
+
+        editName.addEventListener('input', function() {
+            profileData.name = this.value || 'Nama Kamu';
+            document.getElementById('displayName').textContent = profileData.name;
+            saveData();
+        });
+        editRole.addEventListener('input', function() {
+            profileData.role = this.value || 'Role';
+            document.getElementById('displayRole').textContent = profileData.role;
+            saveData();
+        });
+        editSchool.addEventListener('input', function() {
+            profileData.school = this.value || 'Sekolah';
+            document.getElementById('displaySchool').textContent = profileData.school;
+            saveData();
+        });
+        editBio.addEventListener('input', function() {
+            profileData.bio = this.value || 'Bio';
+            document.getElementById('displayBio').textContent = profileData.bio;
+            saveData();
+        });
+
+        // Color Picker
+        const colorBtns = document.querySelectorAll('.color-btn');
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); e.stopPropagation();
+                colorBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                root.style.setProperty('--primary-color', this.getAttribute('data-color'));
+                root.style.setProperty('--secondary-color', this.getAttribute('data-secondary'));
+                initParticles();
+                playClickSound();
+            });
+        });
+
+        // Sliders
+        document.getElementById('glowRange').addEventListener('input', function() {
+            root.style.setProperty('--glow-intensity', this.value);
+            document.getElementById('glowVal').textContent = parseFloat(this.value).toFixed(1);
+        });
+        document.getElementById('speedRange').addEventListener('input', function() {
+            root.style.setProperty('--animation-speed', this.value);
+            document.getElementById('speedVal').textContent = parseFloat(this.value).toFixed(1);
+        });
+        document.getElementById('radiusRange').addEventListener('input', function() {
+            root.style.setProperty('--border-radius', this.value + 'px');
+            document.getElementById('radiusVal').textContent = this.value;
+        });
+
+        // ==========================================
+        // 9. AVATAR SYSTEM
+        // ==========================================
+        const avatarWrapper = document.getElementById('avatarWrapper');
+        const avatarIcon = document.getElementById('avatarIcon');
+        const avatarImg = document.getElementById('avatarImg');
+        const avatarEmoji = document.getElementById('avatarEmoji');
+        const photoUpload = document.getElementById('photoUpload');
+        const removePhotoBtn = document.getElementById('removePhotoBtn');
+
+        const cropModal = document.getElementById('cropModal');
+        const cropImage = document.getElementById('cropImage');
+        const cropContainer = document.getElementById('cropContainer');
+        const zoomRange = document.getElementById('zoomRange');
+        const cropCancel = document.getElementById('cropCancel');
+        const cropConfirm = document.getElementById('cropConfirm');
+
+        let currentImageSrc = null;
+        let offsetX = 0, offsetY = 0, scale = 1;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+
+        // Load avatar dari localStorage
+        const savedAvatar = localStorage.getItem('profileAvatar');
+        if (savedAvatar) {
+            if (savedAvatar.startsWith('data:image')) {
+                avatarImg.src = savedAvatar;
+                avatarIcon.classList.add('has-photo');
+                removePhotoBtn.classList.add('show');
+            } else {
+                avatarEmoji.textContent = savedAvatar;
+            }
+        }
+
+        avatarWrapper.addEventListener('click', () => photoUpload.click());
+
+        photoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast('❌ File harus berupa gambar!');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentImageSrc = event.target.result;
+                openCropModal(currentImageSrc);
+            };
+            reader.readAsDataURL(file);
+            this.value = '';
+        });
+
+        function openCropModal(src) {
+            cropImage.src = src;
+            cropModal.classList.add('active');
+            scale = 1; offsetX = 0; offsetY = 0;
+            zoomRange.value = 1;
+            updateImageTransform();
+            cropImage.onload = () => {
+                const imgRatio = cropImage.naturalWidth / cropImage.naturalHeight;
+                if (imgRatio > 1) {
+                    cropImage.style.height = '100%';
+                    cropImage.style.width = 'auto';
+                } else {
+                    cropImage.style.width = '100%';
+                    cropImage.style.height = 'auto';
+                }
+            };
+        }
+
+        function updateImageTransform() {
+            cropImage.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) scale(${scale})`;
+        }
+
+        zoomRange.addEventListener('input', function() {
+            scale = parseFloat(this.value);
+            updateImageTransform();
+        });
+
+        cropContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            offsetX = e.clientX - startX;
+            offsetY = e.clientY - startY;
+            updateImageTransform();
+        });
+
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        cropContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            startX = touch.clientX - offsetX;
+            startY = touch.clientY - offsetY;
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            offsetX = touch.clientX - startX;
+            offsetY = touch.clientY - startY;
+            updateImageTransform();
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => { isDragging = false; });
+
+        cropCancel.addEventListener('click', () => {
+            cropModal.classList.remove('active');
+            currentImageSrc = null;
+        });
+
+        cropConfirm.addEventListener('click', () => {
+            if (!currentImageSrc) return;
+            const canvasCrop = document.createElement('canvas');
+            const size = 300;
+            canvasCrop.width = size;
+            canvasCrop.height = size;
+            const cctx = canvasCrop.getContext('2d');
+            const img = new Image();
+            img.src = currentImageSrc;
+            img.onload = () => {
+                let baseW, baseH;
+                const imgRatio = img.width / img.height;
+                if (imgRatio > 1) {
+                    baseH = size;
+                    baseW = size * imgRatio;
+                } else {
+                    baseW = size;
+                    baseH = size / imgRatio;
+                }
+                const drawW = baseW * scale;
+                const drawH = baseH * scale;
+                const drawX = (size - drawW) / 2 + offsetX;
+                const drawY = (size - drawH) / 2 + offsetY;
+                cctx.drawImage(img, drawX, drawY, drawW, drawH);
+                const dataURL = canvasCrop.toDataURL('image/jpeg', 0.9);
+                avatarImg.src = dataURL;
+                avatarIcon.classList.add('has-photo');
+                removePhotoBtn.classList.add('show');
+                localStorage.setItem('profileAvatar', dataURL);
+                cropModal.classList.remove('active');
+                showToast('✅ Foto profil berhasil diperbarui!');
+                playClickSound();
+            };
+        });
+
+        removePhotoBtn.addEventListener('click', () => {
+            avatarImg.src = '';
+            avatarIcon.classList.remove('has-photo');
+            removePhotoBtn.classList.remove('show');
+            avatarEmoji.textContent = '👨‍💻';
+            localStorage.removeItem('profileAvatar');
+            showToast('🗑️ Foto profil dihapus');
+            playClickSound();
+        });
+
+        // ==========================================
+        // 10. EMOJI PICKER
+        // ==========================================
+        const emojiModal = document.getElementById('emojiModal');
+        const emojiPickerBtn = document.getElementById('emojiPickerBtn');
+        const emojiCloseBtn = document.getElementById('emojiCloseBtn');
+        const emojiSearch = document.getElementById('emojiSearch');
+        const emojiCategories = document.getElementById('emojiCategories');
+        const emojiGrid = document.getElementById('emojiGrid');
+
+        const emojiData = {
+            "Wajah": ["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","🫠","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😙","🥲","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🫢","🫣","🤫","🤔","🫡","🤐","🤨","😐","😑","😶","🫥","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","🫤","😟","🙁","☹️","😮","😯","😲","😳","🥺","🥹","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠️","💩","🤡","👹","👺","👻","👽","👾","🤖"],
+            "Orang": ["👋","🤚","🖐️","✋","🖖","🫱","🫲","🫳","🫴","🫷","🫸","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","🫵","👍","👎","✊","👊","🤛","🤜","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅","🤳","💪","🦾","🦿","🦵","🦶","👂","🦻","👃","🧠","🫀","🫁","🦷","🦴","👀","👁️","👅","👄","🫦","👶","🧒","👦","👧","🧑","👱","👨","🧔","👩","🧓","👴","👵","🙍","🙎","🙅","🙆","💁","🙋","🧏","🙇","🤦","🤷","👮","🕵️","💂","🥷","👷","🫅","🤴","👸","👳","👲","🧕","🤵","👰","🤰","🫃","🫄","🤱","👼","🎅","🤶","🦸","🦹","🧙","🧚","🧛","🧜","🧝","🧞","🧟","🧌","💆","💇","🚶","🧍","🧎","🏃","💃","🕺","🕴️","👯","🧖","🧗","🤺","🏇","⛷️","🏂","🏌️","🏄","🚣","🏊","⛹️","🏋️","🚴","🚵","🤸","🤼","🤽","🤾","🤹","🧘","🛀","🛌","🧑‍🤝‍🧑","👭","👫","👬","💏","💑","👪"],
+            "Hewan": ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐻‍❄️","🐨","🐯","🦁","🐮","🐷","🐽","🐸","🐵","🙈","🙉","🙊","🐒","🐔","🐧","🐦","🐤","🐣","🐥","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🪱","🐛","🦋","🐌","🐞","🐜","🪰","🪲","🪳","🦟","🦗","🕷️","🕸️","🦂","🐢","🐍","🦎","🦖","🦕","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏","🐪","🐫","🦒","🦘","🦬","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩","🦮","🐕‍🦺","🐈","🐈‍⬛","🪶","🐓","🦃","🦤","🦚","🦜","🦢","🦩","🦝","🦨","🦡","🦫","🦦","🦥","🐁","🐀","🐿️","🦔"],
+            "Makanan": ["🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶️","🫑","🌽","🥕","🫒","🧄","🧅","🥔","🍠","🥐","🥯","🍞","🥖","🥨","🧀","🥚","🍳","🧈","🥞","🧇","🥓","🥩","🍗","🍖","🦴","🌭","🍔","🍟","🍕","🫓","🥪","🥙","🧆","🌮","🌯","🫔","🥗","🥘","🫕","🥫","🍝","🍜","🍲","🍛","🍣","🍱","🥟","🦪","🍤","🍙","🍚","🍘","🍥","🥠","🥮","🍢","🍡","🍧","🍨","🍦","🥧","🧁","🍰","🎂","🍮","🍭","🍬","🍫","🍿","🍩","🍪","🌰","🥜","🍯","🥛","🍼","🫖","☕","🍵","🧃","🥤","🧋","🍶","🍺","🍻","🥂","🍷","🥃","🍸","🍹","🧉","🍾","🧊"],
+            "Aktivitas": ["⚽","🏀","🏈","⚾","🥎","🎾","🏐","🏉","🥏","🎱","🪀","🏓","🏸","🏒","🏑","🥍","🏏","🪃","🥅","⛳","🪁","🏹","🎣","🤿","🥊","🥋","🎽","🛹","🛼","🛷","⛸️","🥌","🎿","⛷️","🏂","🪂","🏋️","🤼","🤸","⛹️","🤺","🤾","🏌️","🏇","🧘","🏄","🏊","🤽","🚣","🧗","🚵","🚴","🏆","🥇","🥈","🥉","🏅","🎖️","🏵️","🎗️","🎫","🎟️","🎪","🤹","🎭","🩰","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🪘","🎷","🎺","🪗","🎸","🪕","🎻","🎲","♟️","🎯","🎳","🎮","🎰","🧩"],
+            "Perjalanan": ["🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🦯","🦽","🦼","🛴","🚲","🛵","🏍️","🛺","🚨","🚔","🚍","🚘","🚖","🚡","🚠","🚟","🚃","🚋","🚞","🚝","🚄","🚅","🚈","🚂","🚆","🚇","🚊","🚉","✈️","🛫","🛬","🛩️","💺","🛰️","🚀","🛸","🚁","🛶","⛵","🚤","🛥️","🛳️","⛴️","🚢","⚓","🪝","⛽","🚧","🚦","🚥","🚏","🗺️","🗿","🗽","🗼","🏰","🏯","🏟️","🎡","🎢","🎠","⛲","⛱️","🏖️","🏝️","🏜️","🌋","⛰️","🏔️","🗻","🏕️","⛺","🛖","🏠","🏡","🏘️","🏚️","🏗️","🏭","🏢","🏬","🏣","🏤","🏥","🏦","🏨","🏪","🏫","🏩","💒","🏛️","⛪","🕌","🕍","🛕","🕋","⛩️","🛤️","🛣️","🗾","🎑","🏞️","🌅","🌄","🌠","🎇","🎆","🌇","🌆","🏙️","🌃","🌌","🌉","🌁"],
+            "Simbol": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞","💓","💗","💖","💘","💝","💟","☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎","☯️","☦️","🛐","⛎","♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓","🆔","⚛️","🉑","☢️","☣️","📴","📳","🈶","🈚","🈸","🈺","🈷️","✴️","🆚","💮","🉐","㊙️","㊗️","🈴","🈵","🈹","🈲","🅰️","🅱️","🆎","🆑","🅾️","🆘","❌","⭕","🛑","⛔","📛","🚫","💯","💢","♨️","🚷","🚯","🚳","🚱","🔞","📵","🚭","❗","❕","❓","❔","‼️","⁉️","🔅","🔆","〽️","⚠️","🚸","🔱","⚜️","🔰","♻️","✅","🈯","💹","❇️","✳️","❎","🌐","💠","Ⓜ️","🌀","💤","🏧","🚾","♿","🅿️","🛗","🈳","🈂️","🛂","🛃","🛄","🛅","🚹","🚺","🚼","⚧️","🚻","🚮","🎦","📶","🈁","🔣","ℹ️","🔤","🔡","🔠","🆖","🆗","🆙","🆒","🆕","🆓","0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","🔢","#️⃣","*️⃣","⏏️","▶️","⏸️","⏯️","⏹️","⏺️","⏭️","⏮️","⏩","⏪","⏫","⏬","◀️","🔼","🔽","➡️","⬅️","⬆️","⬇️","↗️","↘️","↙️","↖️","↕️","↔️","↩️","↪️","⤴️","⤵️","🔀","🔁","🔂","🔄","🔃","🎵","🎶","➕","➖","➗","✖️","🟰","♾️","💲","💱","™️","©️","®️","🔚","🔙","🔛","🔝","🔜","〰️","➰","➿","✔️","☑️","🔘","🔴","🟠","🟡","🟢","🔵","🟣","⚫","⚪","🟤","🔺","🔻","🔸","🔹","🔶","🔷","🔳","🔲","▪️","▫️","◾","◽","◼️","◻️","🟥","🟧","🟨","🟩","🟦","🟪","⬛","⬜","🟫","🔈","🔇","🔉","🔊","🔔","🔕","📣","📢","💬","💭","🗯️","♠️","♣️","♥️","♦️","🃏","🎴","🀄","🕐","🕑","🕒","🕓","🕔","🕕","🕖","🕗","🕘","🕙","🕚","🕛"]
+        };
+
+        const categoryIcons = {
+            "Wajah": "😀", "Orang": "👋", "Hewan": "🐶",
+            "Makanan": "🍎", "Aktivitas": "⚽", "Perjalanan": "🚗", "Simbol": "❤️"
+        };
+
+        let currentCategory = "Wajah";
+
+        function renderCategories() {
+            emojiCategories.innerHTML = '';
+            Object.keys(emojiData).forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'emoji-cat-btn' + (cat === currentCategory ? ' active' : '');
+                btn.textContent = `${categoryIcons[cat]} ${cat}`;
+                btn.addEventListener('click', () => {
+                    currentCategory = cat;
+                    emojiSearch.value = '';
+                    renderCategories();
+                    renderEmojis();
+                    playClickSound();
+                });
+                emojiCategories.appendChild(btn);
+            });
+        }
+
+        function renderEmojis(searchTerm = '') {
+            emojiGrid.innerHTML = '';
+            let emojisToShow = [];
+
+            if (searchTerm.trim() !== '') {
+                const searchLower = searchTerm.toLowerCase();
+                const matchedEmojis = [];
+                Object.keys(emojiData).forEach(cat => {
+                    if (cat.toLowerCase().includes(searchLower)) {
+                        matchedEmojis.push(...emojiData[cat]);
+                    }
+                });
+                emojisToShow = matchedEmojis.length > 0 ? [...new Set(matchedEmojis)] : [];
+            } else {
+                emojisToShow = emojiData[currentCategory];
+            }
+
+            if (emojisToShow.length === 0) {
+                emojiGrid.innerHTML = `<div class="emoji-empty">😕 Emoji tidak ditemukan<br><small style="font-size:12px; color:#606080;">Coba kata kunci lain (misal: wajah, hewan, makanan)</small></div>`;
+                return;
+            }
+
+            const limitedEmojis = emojisToShow.slice(0, 500);
+            limitedEmojis.forEach(emoji => {
+                const item = document.createElement('div');
+                item.className = 'emoji-item';
+                item.textContent = emoji;
+                if (emoji === avatarEmoji.textContent && !avatarIcon.classList.contains('has-photo')) {
+                    item.classList.add('selected');
+                }
+                item.addEventListener('click', () => {
+                    avatarEmoji.textContent = emoji;
+                    avatarImg.src = '';
+                    avatarIcon.classList.remove('has-photo');
+                    removePhotoBtn.classList.remove('show');
+                    localStorage.setItem('profileAvatar', emoji);
+                    document.querySelectorAll('.emoji-item').forEach(el => el.classList.remove('selected'));
+                    item.classList.add('selected');
+                    showToast(`Emoji avatar diganti: ${emoji}`);
+                    playClickSound();
+                    setTimeout(() => emojiModal.classList.remove('active'), 400);
+                });
+                emojiGrid.appendChild(item);
+            });
+        }
+
+        emojiPickerBtn.addEventListener('click', () => {
+            emojiModal.classList.add('active');
+            renderCategories();
+            renderEmojis();
+            playClickSound();
+        });
+
+        emojiCloseBtn.addEventListener('click', () => {
+            emojiModal.classList.remove('active');
+            playClickSound();
+        });
+
+        emojiModal.addEventListener('click', (e) => {
+            if (e.target === emojiModal) emojiModal.classList.remove('active');
+        });
+
+        emojiSearch.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                document.querySelectorAll('.emoji-cat-btn').forEach(b => b.classList.remove('active'));
+            } else {
+                renderCategories();
+            }
+            renderEmojis(this.value);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                emojiModal.classList.remove('active');
+                cropModal.classList.remove('active');
+            }
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+    </script>
+</body>
+</html>
